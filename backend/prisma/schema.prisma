@@ -1,0 +1,126 @@
+// ------------------------------------------------------
+// Schema inicial - App Lojinha do Grupo de Oração
+// ------------------------------------------------------
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoFechamento {
+  MENSAL
+  EVENTO
+}
+
+enum StatusFechamento {
+  ABERTO
+  FECHADO
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  senhaHash String
+  nome      String
+  criadoEm  DateTime @default(now())
+}
+
+model Pessoa {
+  id       String   @id @default(uuid())
+  nome     String
+  telefone String?
+  criadoEm DateTime @default(now())
+
+  lancamentos Lancamento[]
+  pagamentos  Pagamento[]
+
+  @@index([nome])
+}
+
+model Produto {
+  id                 String   @id @default(uuid())
+  nome               String
+  preco              Decimal  @db.Decimal(10, 2)
+  ativo              Boolean  @default(true)
+  controlaQuantidade Boolean  @default(false)
+  criadoEm           DateTime @default(now())
+
+  lancamentos Lancamento[]
+  lotes       LoteProducao[]
+}
+
+model LoteProducao {
+  id                   String     @id @default(uuid())
+  produtoId            String
+  produto              Produto    @relation(fields: [produtoId], references: [id])
+  quantidadeDisponivel Int
+  data                 DateTime   @default(now())
+  fechamentoId         String
+  fechamento           Fechamento @relation(fields: [fechamentoId], references: [id])
+
+  lancamentos Lancamento[]
+}
+
+model Fechamento {
+  id         String           @id @default(uuid())
+  tipo       TipoFechamento
+  titulo     String
+  dataInicio DateTime         @default(now())
+  dataFim    DateTime?
+  status     StatusFechamento @default(ABERTO)
+
+  lancamentos Lancamento[]
+  pagamentos  Pagamento[]
+  lotes       LoteProducao[]
+}
+
+model Lancamento {
+  id String @id @default(uuid())
+
+  pessoaId String
+  pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
+
+  // nulo quando for item avulso/doado ("outro")
+  produtoId String?
+  produto   Produto? @relation(fields: [produtoId], references: [id])
+
+  // usado só quando produtoId é nulo
+  descricaoAvulso String?
+
+  // usado só quando o produto tem controlaQuantidade = true
+  loteId String?
+  lote   LoteProducao? @relation(fields: [loteId], references: [id])
+
+  // valor "congelado" no momento do lançamento
+  // (copiado do preço do produto, OU digitado manualmente se for item "outro")
+  valor      Decimal @db.Decimal(10, 2)
+  quantidade Int     @default(1)
+
+  fechamentoId String
+  fechamento   Fechamento @relation(fields: [fechamentoId], references: [id])
+
+  criadoEm DateTime @default(now())
+
+  @@index([pessoaId])
+  @@index([fechamentoId])
+}
+
+model Pagamento {
+  id String @id @default(uuid())
+
+  pessoaId String
+  pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
+
+  fechamentoId String
+  fechamento   Fechamento @relation(fields: [fechamentoId], references: [id])
+
+  valorTotal    Decimal   @db.Decimal(10, 2)
+  pago          Boolean   @default(false)
+  dataPagamento DateTime?
+
+  @@unique([pessoaId, fechamentoId])
+}

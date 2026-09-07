@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-carvao text-creme font-sans;
+}
+
+h1,
+h2,
+h3 {
+  font-family: theme("fontFamily.display");
+}
+
+input::placeholder {
+  color: theme("colors.neblina");
+  opacity: 0.6;
+}
+
+/* Respeita quem prefere menos animação */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  /* Botões em formato de pílula — a ação principal de cada tela */
+  .btn {
+    @apply inline-flex items-center justify-center font-medium transition-all duration-150 rounded-full px-5 py-3 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97];
+  }
+  .btn-primary {
+    @apply btn bg-dourado text-carvao hover:bg-dourado-escuro shadow-sm shadow-dourado/20;
+  }
+  .btn-secondary {
+    @apply btn bg-carvao-elevado text-creme border border-neblina/30 hover:bg-carvao-elevado/70;
+  }
+  .btn-outline {
+    @apply btn bg-transparent border border-neblina/40 text-creme hover:bg-carvao-elevado;
+  }
+  .btn-danger {
+    @apply btn bg-erro text-creme hover:brightness-110;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center font-medium transition-colors duration-150 text-dourado hover:text-dourado-escuro disabled:opacity-50;
+  }
+
+  /* Cards com barra lateral dourada, em vez do card-padrão-com-sombra-cinza */
+  .card {
+    @apply bg-carvao-elevado border border-neblina/15 border-l-4 border-l-dourado rounded-xl;
+  }
+  .card-quieta {
+    @apply bg-carvao-elevado border border-neblina/15 rounded-xl;
+  }
+
+  .input {
+    @apply w-full border border-neblina/30 rounded-xl px-4 py-3 bg-carvao-elevado text-creme focus:outline-none focus:ring-2 focus:ring-dourado/40 focus:border-dourado transition-colors;
+  }
+
+  .badge-pendente {
+    @apply text-xs px-2.5 py-1 rounded-full font-medium bg-dourado-claro text-dourado border border-dourado/30;
+  }
+  .badge-pago {
+    @apply text-xs px-2.5 py-1 rounded-full font-medium bg-sucesso/15 text-sucesso border border-sucesso/30;
+  }
+  .badge-aberto {
+    @apply text-xs px-2.5 py-1 rounded-full font-medium bg-dourado-claro text-dourado;
+  }
+  .badge-fechado {
+    @apply text-xs px-2.5 py-1 rounded-full font-medium bg-carvao text-neblina;
+  }
+}
